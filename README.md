@@ -102,6 +102,10 @@ Blazor WebAssembly site and a MAUI app references it once.
 dotnet add package Kebechet.Maui.YouTubeEmbed
 ```
 
+⚠️ Requires .NET 10 and `Microsoft.Extensions.*` **10.0.10 or later**, the floor of
+[Shiny.Net.HttpServer](https://www.nuget.org/packages/Shiny.Net.HttpServer). An app that pins an older version (with
+central package management, say) gets `NU1605: Detected package downgrade` and has to raise those pins.
+
 ## Usage
 
 ### 1. Register the provider
