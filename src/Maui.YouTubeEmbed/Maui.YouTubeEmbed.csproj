@@ -9,6 +9,11 @@
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<!-- Lets the linker process this assembly. In a Blazor WebAssembly or Android app the iOS branch of
+		     AddYouTubeEmbed is then dead code, and the server it would start (Shiny.Net.HttpServer) is trimmed out of the
+		     download. -->
+		<IsAotCompatible>true</IsAotCompatible>
 	</PropertyGroup>
 
 	<PropertyGroup Label="NugetProperties">
