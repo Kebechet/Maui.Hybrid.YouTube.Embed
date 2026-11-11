@@ -131,12 +131,30 @@ public sealed class LocalServerYouTubeEmbedUrlProviderTests : IAsyncDisposable
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 	}
 
-	[Fact]
-	public async Task Get_ForeignHostHeader_ReturnsBadRequest()
+	[Theory]
+	[InlineData("attacker.example")]
+	[InlineData("localhost")]
+	[InlineData("192.168.1.20")]
+	public async Task Get_ForeignHostHeader_ReturnsBadRequest(string host)
 	{
 		// Arrange
 		var embedUrl = await _localServerYouTubeEmbedUrlProvider.GetEmbedUrlAsync(VideoId, cancellationToken: _cancellationToken);
 		using var request = new HttpRequestMessage(HttpMethod.Get, embedUrl);
+		request.Headers.Host = host;
+
+		// Act
+		using var response = await _httpClient.SendAsync(request, _cancellationToken);
+
+		// Assert
+		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+	}
+
+	[Fact]
+	public async Task Get_ForeignHostHeaderOnUnknownPath_ReturnsBadRequestBeforeRouting()
+	{
+		// Arrange
+		var embedUri = new Uri(await _localServerYouTubeEmbedUrlProvider.GetEmbedUrlAsync(VideoId, cancellationToken: _cancellationToken));
+		using var request = new HttpRequestMessage(HttpMethod.Get, $"http://127.0.0.1:{embedUri.Port}/no-such-path");
 		request.Headers.Host = "attacker.example";
 
 		// Act

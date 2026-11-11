@@ -114,8 +114,9 @@ Ask for the URL each time rather than storing it: on iOS it is valid while the a
 
 - It starts on the first `GetEmbedUrlAsync` call, not at app start.
 - It listens on `127.0.0.1` only, on a free port, and answers one route: a per-launch random path token, then a video
-  id of exactly 11 characters from `A-Z a-z 0-9 - _`. Anything else is a `404`, a `Host` header other than
-  `127.0.0.1:<port>` (DNS rebinding) a `400`, any method but `GET` a `405`.
+  id of exactly 11 characters from `A-Z a-z 0-9 - _`. Anything else is a `404` and any method but `GET` a `405`.
+- A request whose `Host` is not `127.0.0.1` gets a `400` before routing (DNS rebinding), through Shiny's
+  `HostFilteringMiddleware` narrowed to that one address - `localhost` and other IP addresses are refused too.
 - The page sends `Content-Security-Policy` (YouTube frames only), `Referrer-Policy: strict-origin-when-cross-origin`
   (YouTube gets the origin, never the token), `X-Content-Type-Options: nosniff` and `Cache-Control: no-store`.
 - iOS may reclaim a suspended app's listening socket. Before handing out a URL the provider checks that the listener

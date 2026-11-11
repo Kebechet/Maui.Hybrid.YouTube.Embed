@@ -4,6 +4,7 @@ using System.Runtime.Versioning;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Shiny.Net.HttpServer;
+using Shiny.Net.HttpServer.Security;
 
 namespace Kebechet.Maui.YouTubeEmbed;
 
@@ -45,6 +46,18 @@ internal sealed class LocalServerYouTubeEmbedUrlProvider : IYouTubeEmbedUrlProvi
 			ServerHeader = null,
 		};
 		_httpServer = new HttpServer(httpServerOptions, loggerFactory: loggerFactory);
+
+		// A web page that points a host name of its own at 127.0.0.1 (DNS rebinding) sends that name, not this one. Only
+		// the address the URLs are built from is admitted; Shiny's defaults would also admit localhost and any IP address.
+		var hostFilteringOptions = new HostFilteringOptions
+		{
+			AllowLoopbackHosts = false,
+			AllowIpAddressHosts = false,
+			AllowEmptyHosts = false,
+			AllowedHosts = { IPAddress.Loopback.ToString() },
+		};
+		_httpServer.Use(new HostFilteringMiddleware(hostFilteringOptions, loggerFactory?.CreateLogger<HostFilteringMiddleware>()));
+
 		_httpServer.MapGet($"/{_pathToken}/{{{VideoIdRouteKey}}}", ServeEmbedPageAsync);
 	}
 
@@ -147,13 +160,6 @@ internal sealed class LocalServerYouTubeEmbedUrlProvider : IYouTubeEmbedUrlProvi
 	{
 		var request = httpContext.Request;
 		var response = httpContext.Response;
-
-		// A web page that points a host name of its own at 127.0.0.1 (DNS rebinding) sends that name, not this one.
-		if (request.Host != $"{IPAddress.Loopback}:{httpContext.Connection.LocalPort}")
-		{
-			response.StatusCode = StatusCodes.Status400BadRequest;
-			return;
-		}
 
 		var videoId = request.RouteValues[VideoIdRouteKey];
 		if (!YouTubeVideoId.IsValid(videoId))
