@@ -1,0 +1,54 @@
+﻿@page "/"
+@inject IYouTubeEmbedUrlProvider YouTubeEmbedUrlProvider
+
+<h1>Maui.YouTubeEmbed</h1>
+
+<section>
+	<h2>Through the package</h2>
+	<p class="hint">
+		<code>&lt;YouTubeEmbed&gt;</code> plays on every platform: iOS and Mac Catalyst load the player from the app's own
+		127.0.0.1 server, other platforms straight from YouTube. It plays @_range.
+	</p>
+	<YouTubeEmbed VideoId="@VideoId" Start="_start" End="_end" class="video" />
+	<p class="url" id="package-url">@_packageEmbedUrl</p>
+	<button id="next-range" @onclick="ShowNextRange">Next range (asks for a new URL)</button>
+</section>
+
+<section>
+	<h2>Plain iframe (control)</h2>
+	<p class="hint">YouTube's own URL in a bare iframe. On iOS it shows Error 153, because a page served from app:// sends no Referer.</p>
+	<iframe class="video"
+	        src="https://www.youtube.com/embed/@VideoId?start=30&end=45"
+	        title="Plain YouTube iframe"
+	        allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+	        allowfullscreen></iframe>
+</section>
+
+@code {
+	private const string VideoId = "M7lc1UVf-VE";
+
+	private static readonly TimeSpan _rangeLength = TimeSpan.FromSeconds(15);
+	private static readonly TimeSpan _rangeStep = TimeSpan.FromSeconds(10);
+
+	private TimeSpan _start = TimeSpan.FromSeconds(30);
+	private TimeSpan _end => _start + _rangeLength;
+	private string? _packageEmbedUrl;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await LoadPackageEmbedUrl();
+	}
+
+	private async Task ShowNextRange()
+	{
+		_start += _rangeStep;
+		await LoadPackageEmbedUrl();
+	}
+
+	private async Task LoadPackageEmbedUrl()
+	{
+		_packageEmbedUrl = await YouTubeEmbedUrlProvider.GetEmbedUrlAsync(VideoId, _start, _end);
+	}
+
+	private string _range => $"{_start:m\\:ss}-{_end:m\\:ss}";
+}

@@ -1,0 +1,12 @@
+@namespace Kebechet.Maui.YouTubeEmbed
+@inject IYouTubeEmbedUrlProvider _youTubeEmbedUrlProvider
+
+@if (_embedUrl is not null)
+{
+	<iframe src="@_embedUrl"
+	        title="@Title"
+	        allow="@YouTubeEmbedPage.AllowedFeatures"
+	        referrerpolicy="strict-origin-when-cross-origin"
+	        allowfullscreen
+	        @attributes="AdditionalAttributes"></iframe>
+}

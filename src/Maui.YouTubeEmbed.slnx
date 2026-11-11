@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Maui.YouTubeEmbed\Maui.YouTubeEmbed.csproj" />
+  <Folder Name="/tests/">
+    <Project Path="..\tests\Maui.YouTubeEmbed.Tests\Maui.YouTubeEmbed.Tests.csproj" />
+  </Folder>
+</Solution>
