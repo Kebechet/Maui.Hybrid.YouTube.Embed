@@ -116,6 +116,19 @@ builder.Services.AddYouTubeEmbed();
 
 In `MauiProgram`, and in the `Program` of a Blazor WebAssembly app that shares the same components.
 
+⚠️ **Mac Catalyst: allow the app to listen.** The App Sandbox blocks a listening socket, even on `127.0.0.1`, unless
+the app has the
+[`com.apple.security.network.server`](https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.server)
+entitlement. The MAUI template's `Platforms/MacCatalyst/Entitlements.plist` turns the sandbox on with only
+`network.client`, so add:
+
+```xml
+<key>com.apple.security.network.server</key>
+<true/>
+```
+
+iOS needs no entitlement.
+
 ### 2. ⚠️ Keep the embeds in the WebView (MAUI, iOS and Mac Catalyst)
 
 ⚠️ **Without this step the video never shows on iOS.** A BlazorWebView on iOS and Mac Catalyst raises `UrlLoading` for
@@ -151,6 +164,31 @@ public partial class MainPage : ContentPage, IDisposable
 }
 ```
 
+`MainPage` now takes the provider in its constructor, so it has to come from the container rather than
+`new MainPage()`, as in the [demo](demo/DemoApp/App.xaml.cs):
+
+```csharp
+// MauiProgram.cs
+builder.Services.AddTransient<MainPage>();
+
+// App.xaml.cs
+public partial class App : Application
+{
+    private readonly MainPage _mainPage;
+
+    public App(MainPage mainPage)
+    {
+        _mainPage = mainPage;
+        InitializeComponent();
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(_mainPage);
+    }
+}
+```
+
 ### 3. Show a video
 
 ```razor
@@ -171,7 +209,10 @@ To render the iframe yourself (a loading skeleton, a tap-to-play overlay), ask f
 ```razor
 @inject IYouTubeEmbedUrlProvider YouTubeEmbedUrlProvider
 
-<iframe src="@_embedUrl" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+<iframe src="@_embedUrl"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen></iframe>
 
 @code {
     private string? _embedUrl;
@@ -182,6 +223,9 @@ To render the iframe yourself (a loading skeleton, a tap-to-play overlay), ask f
     }
 }
 ```
+
+Keep that `allow` list whole: on iOS this iframe holds the local page, and a feature it does not allow is denied to the
+YouTube player inside it as well.
 
 Ask for the URL each time rather than storing it: on iOS it is valid while the app runs.
 
@@ -196,7 +240,9 @@ Ask for the URL each time rather than storing it: on iOS it is valid while the a
   (YouTube gets the origin, never the token), `X-Content-Type-Options: nosniff` and `Cache-Control: no-store`.
 - iOS may reclaim a suspended app's listening socket
   ([TN2277](https://developer.apple.com/library/archive/technotes/tn2277/_index.html)). Before handing out a URL the
-  provider checks that the listener still accepts, and restarts the server on the same port if it does not.
+  provider checks that the listener still accepts, and restarts the server if it does not: on the same port, or on a new
+one when another process took it meanwhile. URLs handed out from then on carry the new port; an iframe still showing
+an old URL no longer passes `IsEmbedUrl` and has to ask for a new one.
 - No `Info.plist` entry is needed: no App Transport Security exception, no local network usage description, and no
   local network permission prompt appears (verified on iOS 26.2).
 

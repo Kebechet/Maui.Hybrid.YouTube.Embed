@@ -9,7 +9,10 @@ namespace Kebechet.Maui.YouTubeEmbed;
 /// </summary>
 public partial class YouTubeEmbed
 {
-	/// <summary>The YouTube video id, such as <c>M7lc1UVf-VE</c>.</summary>
+	/// <summary>
+	/// The YouTube video id, such as <c>M7lc1UVf-VE</c>. Rendering throws <see cref="ArgumentException"/> for anything
+	/// <see cref="YouTubeVideoId.IsValid"/> rejects; check ids that come from users or content first.
+	/// </summary>
 	[Parameter, EditorRequired] public required string VideoId { get; set; }
 
 	/// <summary>Where playback starts. Whole seconds; a fraction is dropped.</summary>

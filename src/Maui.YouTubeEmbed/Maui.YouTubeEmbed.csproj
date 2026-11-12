@@ -29,8 +29,8 @@
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageTags>maui;blazor;blazorwebview;youtube;embed;iframe;ios;wkwebview;error153</PackageTags>
-		<Version>1.0.0</Version>
-		<PackageReleaseNotes>Initial release</PackageReleaseNotes>
+		<Version>1.0.1</Version>
+		<PackageReleaseNotes>Docs: the Mac Catalyst network.server entitlement, MainPage from DI, the full iframe allow list, port changes after a restart, and that YouTubeEmbed throws for an invalid VideoId.</PackageReleaseNotes>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
