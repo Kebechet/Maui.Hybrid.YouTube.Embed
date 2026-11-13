@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// What to play: a validated video id and the optional range of it, in the whole seconds YouTube accepts.

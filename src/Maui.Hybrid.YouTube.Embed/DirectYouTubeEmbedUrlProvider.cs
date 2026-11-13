@@ -1,4 +1,4 @@
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// Hands out YouTube's own embed URL. Right for every host whose page is an http(s) document, so the iframe request

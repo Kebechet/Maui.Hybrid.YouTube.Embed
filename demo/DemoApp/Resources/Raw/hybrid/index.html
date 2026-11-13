@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HybridWebView</title>
+    <script src="_framework/hybridwebview.js"></script>
+    <style>
+        html, body { margin: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #1a1a1a; background: #ffffff; }
+        .content { padding: 0.75rem 1rem 2rem; }
+        h1 { font-size: 1.3rem; margin: 0 0 0.5rem; }
+        h2 { font-size: 1rem; margin: 1rem 0 0.25rem; }
+        .hint { font-size: 0.8rem; margin: 0 0 0.5rem; color: #444444; }
+        .video { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; background: #000000; }
+        .url { font-size: 0.7rem; word-break: break-all; color: #666666; margin: 0.25rem 0 0; }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>HybridWebView</h1>
+
+        <h2>Through the package</h2>
+        <p class="hint">
+            Plain JavaScript, no Blazor. The page asks .NET for the URL through <code>window.HybridWebView.InvokeDotNet</code>
+            and sets it on its own iframe. It plays 0:30-0:45.
+        </p>
+        <iframe id="package-video"
+                class="video"
+                title="YouTube video player"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; fullscreen; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen></iframe>
+        <p class="url" id="package-url"></p>
+
+        <h2>Plain iframe (control)</h2>
+        <p class="hint">YouTube's own URL in a bare iframe. On iOS it shows Error 153: HybridWebView serves this page from app:// too.</p>
+        <iframe class="video"
+                src="https://www.youtube.com/embed/M7lc1UVf-VE?start=30&end=45"
+                title="Plain YouTube iframe"
+                allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                allowfullscreen></iframe>
+    </div>
+
+    <script>
+        (async () => {
+            const embedUrl = await window.HybridWebView.InvokeDotNet('GetEmbedUrl', ['M7lc1UVf-VE', 30, 45]);
+            document.getElementById('package-video').src = embedUrl;
+            document.getElementById('package-url').textContent = embedUrl;
+        })();
+    </script>
+</body>
+</html>

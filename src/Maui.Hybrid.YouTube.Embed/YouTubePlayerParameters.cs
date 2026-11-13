@@ -1,4 +1,4 @@
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// Query parameters of YouTube's embed URL (https://developers.google.com/youtube/player_parameters) - a fixed format

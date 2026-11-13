@@ -3,15 +3,18 @@
 public partial class App : Application
 {
 	private readonly MainPage _mainPage;
+	private readonly HybridPage _hybridPage;
 
-	public App(MainPage mainPage)
+	public App(MainPage mainPage, HybridPage hybridPage)
 	{
 		_mainPage = mainPage;
+		_hybridPage = hybridPage;
 		InitializeComponent();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		return new Window(_mainPage) { Title = "YouTubeEmbed Demo" };
+		var tabbedPage = new TabbedPage { Children = { _mainPage, _hybridPage } };
+		return new Window(tabbedPage) { Title = "Maui.Hybrid.YouTube.Embed Demo" };
 	}
 }

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// Renders an <c>&lt;iframe&gt;</c> that plays a YouTube video, with the URL from <see cref="IYouTubeEmbedUrlProvider"/>.

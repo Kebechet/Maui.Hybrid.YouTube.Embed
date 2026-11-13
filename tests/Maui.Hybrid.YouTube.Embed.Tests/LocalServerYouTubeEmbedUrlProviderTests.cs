@@ -2,7 +2,7 @@ using System.Net;
 using Shouldly;
 using Xunit;
 
-namespace Kebechet.Maui.YouTubeEmbed.Tests;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed.Tests;
 
 /// <summary>
 /// Runs the real loopback server: every request goes through a socket on 127.0.0.1.

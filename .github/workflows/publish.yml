@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_PATH: src/Maui.YouTubeEmbed/Maui.YouTubeEmbed.csproj
-  SOLUTION_PATH: src/Maui.YouTubeEmbed.slnx
-  PACKAGE_NAME: Kebechet.Maui.YouTubeEmbed
+  PROJECT_PATH: src/Maui.Hybrid.YouTube.Embed/Maui.Hybrid.YouTube.Embed.csproj
+  SOLUTION_PATH: src/Maui.Hybrid.YouTube.Embed.slnx
+  PACKAGE_NAME: Kebechet.Maui.Hybrid.YouTube.Embed
   DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: Release
   OUTPUT_PATH: ./nupkg
@@ -15,11 +15,15 @@ env:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    # The package's iOS and Mac Catalyst builds need those workloads, which do not install on Linux.
+    runs-on: windows-latest
     permissions:
       contents: write
       packages: write
       id-token: write # lets NuGet/login request the GitHub OIDC token
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - uses: actions/checkout@v7
@@ -29,15 +33,49 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Install the iOS and Mac Catalyst workloads
+        run: dotnet workload install ios maccatalyst
+
       - name: Get version from csproj
         id: version
         run: |
-          VERSION=$(grep -oP '(?<=<Version>)[^<]+' ${{ env.PROJECT_PATH }})
+          VERSION=$(dotnet msbuild "$PROJECT_PATH" -getProperty:Version)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Version: $VERSION"
 
       - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      # The package id is permanent on nuget.org: a wrong prefix can only be deprecated, never renamed.
+      # Maui.* needs UseMaui or a platform TFM, a Razor library without them is Blazor.*, and
+      # Api/Extensions/Types/Build are neither (new-nuget-package skill, "The name must fit the project").
+      - name: Check the package id fits the project
+        run: |
+          PACKAGE_ID=$(dotnet msbuild "$PROJECT_PATH" -getProperty:PackageId)
+          USE_MAUI=$(dotnet msbuild "$PROJECT_PATH" -getProperty:UseMaui)
+          IS_RAZOR=$(dotnet msbuild "$PROJECT_PATH" -getProperty:UsingMicrosoftNETSdkRazor)
+          TFMS=$(dotnet msbuild "$PROJECT_PATH" -getProperty:TargetFramework)$(dotnet msbuild "$PROJECT_PATH" -getProperty:TargetFrameworks)
+
+          KIND=plain
+          if [ "$USE_MAUI" = true ] || echo "$TFMS" | grep -qE -- '-(android|ios|maccatalyst|windows|tizen)'; then
+            KIND=maui
+          elif [ "$IS_RAZOR" = true ]; then
+            KIND=razor
+          fi
+
+          case "$PACKAGE_ID" in
+            Kebechet.Maui.*) ALLOWED="maui" ;;
+            Kebechet.Blazor.*) ALLOWED="razor plain" ;;
+            Kebechet.Api.*|Kebechet.Extensions.*|Kebechet.Types.*|Kebechet.Build.*) ALLOWED="plain" ;;
+            *) echo "::error::$PACKAGE_ID has no Kebechet prefix (Blazor, Maui, Api, Extensions, Types, Build)"; exit 1 ;;
+          esac
+
+          if ! echo " $ALLOWED " | grep -q " $KIND "; then
+            echo "::error::$PACKAGE_ID does not fit its project, which is '$KIND' (maui = UseMaui or a platform TFM; razor = Microsoft.NET.Sdk.Razor without them). Maui.* needs maui, a razor library is Blazor.*, Api/Extensions/Types/Build need plain. The id is permanent on nuget.org: rename before the first publish."
+            exit 1
+          fi
+
+          echo "$PACKAGE_ID fits its project ($KIND)"
 
       # GeneratePackageOnBuild means the build itself emits the .nupkg (and .snupkg) under
       # src/<Project>/bin/<Config>/, so a separate `dotnet pack` step is redundant.
@@ -50,20 +88,40 @@ jobs:
       - name: Collect package
         run: |
           mkdir -p ${{ env.OUTPUT_PATH }}
-          cp src/*/bin/${{ env.BUILD_CONFIGURATION }}/*.nupkg ${{ env.OUTPUT_PATH }}/
-          cp src/*/bin/${{ env.BUILD_CONFIGURATION }}/*.snupkg ${{ env.OUTPUT_PATH }}/ || true
+          cp src/*/bin/${{ env.BUILD_CONFIGURATION }}/${{ env.PACKAGE_NAME }}.*.nupkg ${{ env.OUTPUT_PATH }}/
+          cp src/*/bin/${{ env.BUILD_CONFIGURATION }}/${{ env.PACKAGE_NAME }}.*.snupkg ${{ env.OUTPUT_PATH }}/ || true
           ls -la ${{ env.OUTPUT_PATH }}
 
-      # The component and the provider live in the one assembly; a package without it installs cleanly and fails at
-      # the first build that uses it.
+      # Each build must be in the package, and the local server's dependency only in the iOS and Mac Catalyst ones: an
+      # app whose iOS build is missing silently gets the net10.0 one, and a net10.0 build depending on Shiny carries a
+      # web server into every Blazor WebAssembly download.
       - name: Verify the package
+        shell: pwsh
         run: |
-          PACKAGE=$(ls ${{ env.OUTPUT_PATH }}/*.nupkg | grep -v snupkg | head -1)
-          unzip -l "$PACKAGE" > packed.txt
-          for NEEDLE in lib/net10.0/Maui.YouTubeEmbed.dll README.md icon.png; do
-            grep -q "$NEEDLE" packed.txt || { echo "::error::$NEEDLE missing from $(basename "$PACKAGE")"; cat packed.txt; exit 1; }
-          done
-          cat packed.txt
+          $package = Get-ChildItem "${{ env.OUTPUT_PATH }}/*.nupkg" | Where-Object { $_.Name -notlike '*.snupkg' } | Select-Object -First 1
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($package.FullName)
+          $entries = $zip.Entries.FullName
+          foreach ($expected in @('lib/net10.0/Maui.Hybrid.YouTube.Embed.dll', 'lib/net10.0-ios*/Maui.Hybrid.YouTube.Embed.dll', 'lib/net10.0-maccatalyst*/Maui.Hybrid.YouTube.Embed.dll', 'README.md', 'icon.png')) {
+            if (-not ($entries | Where-Object { $_ -like $expected })) {
+              throw "$expected is missing from $($package.Name)"
+            }
+          }
+          $nuspecEntry = $zip.Entries | Where-Object { $_.FullName -like '*.nuspec' } | Select-Object -First 1
+          $reader = New-Object System.IO.StreamReader($nuspecEntry.Open())
+          [xml]$nuspec = $reader.ReadToEnd()
+          $reader.Dispose()
+          $zip.Dispose()
+          $groups = $nuspec.package.metadata.dependencies.group
+          foreach ($group in $groups) {
+            $hasShiny = [bool]($group.dependency | Where-Object { $_.id -eq 'Shiny.Net.HttpServer' })
+            $isApple = $group.targetFramework -match 'ios|maccatalyst'
+            if ($hasShiny -ne $isApple) {
+              throw "Shiny.Net.HttpServer dependency is wrong for $($group.targetFramework): present = $hasShiny"
+            }
+          }
+          $entries
+          Write-Host "Every build is present, and Shiny is a dependency of the iOS and Mac Catalyst builds only."
 
       # Trusted Publishing: the policy on nuget.org matches this workflow's file name, and the
       # key it returns expires after 1 hour, so keep this step directly before the push.
@@ -95,6 +153,6 @@ jobs:
 
             ### Links
             - [NuGet Package](https://www.nuget.org/packages/${{ env.PACKAGE_NAME }}/${{ steps.version.outputs.version }})
-            - [GitHub](https://github.com/Kebechet/Maui.YouTubeEmbed)
+            - [GitHub](https://github.com/Kebechet/Maui.Hybrid.YouTube.Embed)
           files: ${{ env.OUTPUT_PATH }}/*.nupkg
           generate_release_notes: true

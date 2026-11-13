@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:DemoApp"
              xmlns:components="clr-namespace:DemoApp.Components"
-             x:Class="DemoApp.MainPage">
+             x:Class="DemoApp.MainPage"
+             Title="BlazorWebView">
 
     <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
         <BlazorWebView.RootComponents>

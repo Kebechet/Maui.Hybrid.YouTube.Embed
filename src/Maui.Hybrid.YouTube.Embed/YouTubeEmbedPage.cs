@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// The page the local server returns: nothing but YouTube's player filling the frame.

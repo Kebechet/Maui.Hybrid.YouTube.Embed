@@ -1,4 +1,4 @@
-﻿using Kebechet.Maui.YouTubeEmbed;
+﻿using Kebechet.Maui.Hybrid.YouTube.Embed;
 using Microsoft.Extensions.Logging;
 
 namespace DemoApp;
@@ -18,6 +18,7 @@ public static class MauiProgram
 		builder.Services.AddMauiBlazorWebView();
 		builder.Services.AddYouTubeEmbed();
 		builder.Services.AddTransient<MainPage>();
+		builder.Services.AddTransient<HybridPage>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

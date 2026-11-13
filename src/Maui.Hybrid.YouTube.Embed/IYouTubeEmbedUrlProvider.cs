@@ -1,4 +1,4 @@
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// Gives the URL to load in an <c>&lt;iframe&gt;</c> to play a YouTube video in the current host. Register it with

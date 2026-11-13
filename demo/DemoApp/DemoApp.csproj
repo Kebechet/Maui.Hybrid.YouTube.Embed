@@ -61,7 +61,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Maui.YouTubeEmbed\Maui.YouTubeEmbed.csproj" />
+        <ProjectReference Include="..\..\src\Maui.Hybrid.YouTube.Embed\Maui.Hybrid.YouTube.Embed.csproj" />
     </ItemGroup>
 
 </Project>

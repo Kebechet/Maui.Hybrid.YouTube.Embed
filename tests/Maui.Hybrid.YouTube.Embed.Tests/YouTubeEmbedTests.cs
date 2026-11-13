@@ -5,7 +5,7 @@ using Shouldly;
 using Xunit;
 using BunitContext = Bunit.TestContext;
 
-namespace Kebechet.Maui.YouTubeEmbed.Tests;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed.Tests;
 
 public sealed class YouTubeEmbedTests : IDisposable
 {

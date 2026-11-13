@@ -1,4 +1,4 @@
-﻿using Kebechet.Maui.YouTubeEmbed;
+﻿using Kebechet.Maui.Hybrid.YouTube.Embed;
 using Microsoft.AspNetCore.Components.WebView;
 
 namespace DemoApp;

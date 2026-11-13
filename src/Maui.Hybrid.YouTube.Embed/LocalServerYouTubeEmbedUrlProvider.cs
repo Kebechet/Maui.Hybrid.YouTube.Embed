@@ -6,16 +6,16 @@ using Microsoft.Extensions.Logging;
 using Shiny.Net.HttpServer;
 using Shiny.Net.HttpServer.Security;
 
-namespace Kebechet.Maui.YouTubeEmbed;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed;
 
 /// <summary>
 /// Hands out URLs of a page on a loopback HTTP server inside the app, and that page embeds YouTube's player.
 /// <para>
-/// A BlazorWebView on iOS and Mac Catalyst serves the app from <c>app://0.0.0.1</c>, and WebKit sends a Referer only
-/// from http(s) documents. YouTube refuses an embed request without one (Error 153, "embedder identity"). The page
-/// served from <c>http://127.0.0.1</c> is an http document, so its iframe request carries
-/// <c>Referer: http://127.0.0.1:port/</c>. WebKit offers no public API to set the header instead, and it refuses a
-/// scheme handler for http or https.
+/// MAUI's web views (BlazorWebView, HybridWebView) on iOS and Mac Catalyst serve the app from <c>app://0.0.0.1</c>,
+/// and WebKit sends a Referer only from http(s) documents. YouTube refuses an embed request without one (Error 153,
+/// "embedder identity"). The page served from <c>http://127.0.0.1</c> is an http document, so its iframe request
+/// carries <c>Referer: http://127.0.0.1:port/</c>. WebKit offers no public API to set the header instead, and it
+/// refuses a scheme handler for http or https.
 /// </para>
 /// </summary>
 [UnsupportedOSPlatform("browser")]

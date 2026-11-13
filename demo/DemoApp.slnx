@@ -1,5 +1,5 @@
 <Solution>
-  <Project Path="../src/Maui.YouTubeEmbed/Maui.YouTubeEmbed.csproj" />
+  <Project Path="../src/Maui.Hybrid.YouTube.Embed/Maui.Hybrid.YouTube.Embed.csproj" />
   <Project Path="DemoApp/DemoApp.csproj">
     <Deploy />
   </Project>

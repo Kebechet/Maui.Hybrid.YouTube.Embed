@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using Xunit;
 
-namespace Kebechet.Maui.YouTubeEmbed.Tests;
+namespace Kebechet.Maui.Hybrid.YouTube.Embed.Tests;
 
 public class YouTubeEmbedServiceCollectionExtensionsTests
 {

@@ -7,13 +7,14 @@ on:
     branches: [ main ]
 
 env:
-  SOLUTION_PATH: src/Maui.YouTubeEmbed.slnx
+  SOLUTION_PATH: src/Maui.Hybrid.YouTube.Embed.slnx
   DOTNET_VERSION: '10.0.x'
   BUILD_CONFIGURATION: Release
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # The package's iOS and Mac Catalyst builds need those workloads, which do not install on Linux.
+    runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v7
@@ -22,6 +23,9 @@ jobs:
       uses: actions/setup-dotnet@v6
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Install the iOS and Mac Catalyst workloads
+      run: dotnet workload install ios maccatalyst
 
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -35,6 +39,7 @@ jobs:
 
     - name: Find coverage file
       id: coverage
+      shell: bash
       run: echo "file=$(find ./coverage -name 'coverage.cobertura.xml' | head -1)" >> $GITHUB_OUTPUT
 
     - name: Upload coverage to Codecov

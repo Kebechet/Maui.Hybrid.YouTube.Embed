@@ -19,7 +19,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\Maui.YouTubeEmbed\Maui.YouTubeEmbed.csproj" />
+		<ProjectReference Include="..\..\src\Maui.Hybrid.YouTube.Embed\Maui.Hybrid.YouTube.Embed.csproj" />
+	</ItemGroup>
+
+	<!-- The local server ships only in the iOS and Mac Catalyst builds of the package, which can't run here. Its source
+	     is compiled into this project instead, against the net10.0 build, so the tests still run it on a real socket.
+	     Keep Shiny.Net.HttpServer at the package's version. -->
+	<ItemGroup>
+		<Compile Include="..\..\src\Maui.Hybrid.YouTube.Embed\LocalServerYouTubeEmbedUrlProvider.cs" Link="LocalServerYouTubeEmbedUrlProvider.cs" />
+		<PackageReference Include="Shiny.Net.HttpServer" Version="2.2.1" />
 	</ItemGroup>
 
 </Project>
