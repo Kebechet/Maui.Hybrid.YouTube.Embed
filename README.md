@@ -198,6 +198,8 @@ public partial class App : Application
 }
 ```
 
+A HybridWebView needs none of this: it raises no such event, and its iframes load in place (checked on iOS 26.2).
+
 ### 3. Show a video
 
 ```razor
@@ -342,10 +344,10 @@ today. A proxy page on a website does not send the bundle id either: YouTube the
 
 | Device | Result |
 |---|---|
-| iPhone 11, iOS 26.2 | The package's player plays the range inline, also after 75 s in the background; a plain YouTube iframe on the same page shows Error 153 |
+| iPhone 11, iOS 26.2 | The package's player plays the range inline in a BlazorWebView, also after 75 s in the background, and in a HybridWebView page with plain JavaScript; a plain YouTube iframe shows Error 153 in both |
 | Samsung Galaxy A53, Android 16 | Plays the range |
 
-The HybridWebView page of the demo, Mac Catalyst and Windows have not been run on a device yet.
+Mac Catalyst and Windows have not been run on a device.
 
 ## License
 
